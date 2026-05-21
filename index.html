@@ -808,7 +808,9 @@ const BATCH = 60;
 let inv=[], filt=[], rbuf=[], roff=0;
 let curCat='all', inStOnly=false, sortM='default', curView='grid', Q='';
 let aiCfg={endpoint:'',key:'',model:''};
-let sbUrl='', sbKey='';
+// ── SUPABASE CREDENTIALS ── fill these in once, works for everyone ──
+let sbUrl='https://ceihxxpefzaryxypabjz.supabase.co';
+let sbKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlaWh4eHBlZnphcnl4eXBhYmp6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNzY5NTIsImV4cCI6MjA5NDk1Mjk1Mn0.UxbofxoyOoaqO5ob4fRa1qlAv2Hhcc7V9hSVkKzljkk';
 let pinEntry='', pinTarget='upload';
 let uploadedAt=null;
 let vo=null;
@@ -1530,9 +1532,9 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
   // AI config
   try{const s=localStorage.getItem('sm_ai');if(s){aiCfg=JSON.parse(s);const aiEl=document.getElementById('aiStxt');if(aiCfg.key&&aiEl)aiEl.textContent='AI configured · Ready';}}catch(e){}
 
-  // Supabase credentials
+  // Supabase credentials — check localStorage override first, otherwise use hardcoded
   ldTxt.textContent='Loading configuration…'; ldFill.style.width='20%';
-  try{const s=localStorage.getItem('sm_sb');if(s){const p=JSON.parse(s);sbUrl=p.url||'';sbKey=p.key||'';}}catch(e){}
+  try{const s=localStorage.getItem('sm_sb');if(s){const p=JSON.parse(s);if(p.url)sbUrl=p.url;if(p.key)sbKey=p.key;}}catch(e){}
 
   await sleep(200);
   ldFill.style.width='50%';
