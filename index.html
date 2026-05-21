@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaveMore · Inventory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#c9a84c;--gold-h:#dfc06a;
+  --gold-dim:rgba(201,168,76,.12);--gold-glow:rgba(201,168,76,.26);
+  --green:#3ecb82;--red:#e05a5a;
+}
+[data-theme="dark"]{
+  --bg:#0e0e11;--bg1:#131318;--bg2:#18181f;
+  --surf:#1e1e26;--s2:#252530;
+  --br:rgba(255,255,255,.07);--br2:rgba(255,255,255,.12);
+  --t1:#f0ede6;--t2:#888699;--t3:#44424f;
+  --sh:0 24px 60px rgba(0,0,0,.6);--sh2:0 6px 24px rgba(0,0,0,.35);
+}
+[data-theme="light"]{
+  --bg:#f2f0ec;--bg1:#eceae5;--bg2:#e4e1da;
+  --surf:#ffffff;--s2:#f5f3ef;
+  --br:rgba(0,0,0,.07);--br2:rgba(0,0,0,.13);
+  --t1:#111113;--t2:#65636f;--t3:#b2b0ba;
+  --sh:0 24px 60px rgba(0,0,0,.09);--sh2:0 6px 24px rgba(0,0,0,.07);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:14px;}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);color:var(--t1);
+  height:100vh;overflow:hidden;
+  transition:background .25s,color .25s;
+}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--br2);border-radius:99px;}
+::selection{background:var(--gold-dim);}
+button,input,textarea{font-family:inherit;}
+a{color:var(--gold);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* ── SHELL ── */
+.shell{display:flex;height:100vh;overflow:hidden;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:224px;flex-shrink:0;
+  background:var(--bg1);border-right:1px solid var(--br);
+  display:flex;flex-direction:column;transition:background .25s;
+}
+.sb-logo{
+  padding:22px 18px 18px;border-bottom:1px solid var(--br);
+  display:flex;flex-direction:column;gap:7px;
+}
+.sb-logo img{height:34px;width:auto;object-fit:contain;object-position:left;}
+.sb-fb{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--gold);display:none;}
+.sb-tag{font-size:10px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;font-weight:500;}
+.sb-nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:1px;overflow-y:auto;}
+.nb{
+  width:100%;display:flex;align-items:center;gap:10px;
+  padding:9px 11px;border-radius:9px;
+  border:none;background:transparent;
+  color:var(--t2);font-size:13px;font-weight:500;
+  cursor:pointer;text-align:left;transition:background .12s,color .12s;user-select:none;
+}
+.nb:hover{background:var(--s2);color:var(--t1);}
+.nb.active{background:var(--gold-dim);color:var(--gold);}
+.nb .ic{
+  width:30px;height:30px;border-radius:7px;background:var(--s2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;transition:background .12s;
+}
+.nb.active .ic{background:var(--gold-glow);}
+.nbb{margin-left:auto;font-size:10px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--s2);color:var(--t3);}
+.nb.active .nbb{background:var(--gold-glow);color:var(--gold);}
+.sb-div{height:1px;background:var(--br);margin:5px 10px;}
+.sb-foot{padding:8px 8px 14px;border-top:1px solid var(--br);}
+.sb-sync{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 11px;font-size:11px;color:var(--t3);
+}
+.sb-sync-dot{width:7px;height:7px;border-radius:50%;background:var(--t3);flex-shrink:0;}
+.sb-sync-dot.live{background:var(--green);box-shadow:0 0 7px var(--green);animation:pp 2.5s ease-in-out infinite;}
+.sb-sync-dot.syncing{background:var(--gold);box-shadow:0 0 7px var(--gold);}
+@keyframes pp{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+/* ── CONTENT ── */
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:56px;flex-shrink:0;
+  background:var(--bg1);border-bottom:1px solid var(--br);
+  display:flex;align-items:center;padding:0 26px;gap:12px;
+  transition:background .25s;
+}
+.tb-srch{flex:1;max-width:500px;position:relative;}
+.tb-srch input{
+  width:100%;background:var(--surf);border:1px solid var(--br2);
+  border-radius:9px;padding:8px 14px 8px 36px;
+  color:var(--t1);font-size:13px;outline:none;
+  transition:border-color .18s,box-shadow .18s;
+}
+.tb-srch input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim);}
+.tb-srch input::placeholder{color:var(--t3);}
+.tb-si{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px;pointer-events:none;}
+.tb-r{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.ib{
+  width:34px;height:34px;border-radius:8px;
+  border:1px solid var(--br2);background:var(--surf);
+  color:var(--t2);cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;
+}
+.ib:hover{border-color:var(--gold);color:var(--gold);}
+.ab{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:8px;
+  border:1px solid var(--br2);background:var(--surf);
+  color:var(--t2);font-size:12px;font-weight:500;
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.ab:hover{border-color:var(--t2);color:var(--t1);}
+.ab.gld{background:var(--gold);border-color:var(--gold);color:#000;font-weight:600;}
+.ab.gld:hover{background:var(--gold-h);border-color:var(--gold-h);}
+
+/* ── PAGES ── */
+.main{flex:1;overflow-y:auto;overflow-x:hidden;}
+.page{display:none;padding:28px 28px 60px;animation:pgIn .2s ease;}
+.page.active{display:block;}
+@keyframes pgIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+.ptitle{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--t1);letter-spacing:-.02em;margin-bottom:4px;}
+.psub{font-size:12px;color:var(--t2);margin-bottom:24px;}
+
+/* ── FULL SCREEN STATES ── */
+.fs{
+  position:fixed;inset:0;z-index:200;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;text-align:center;padding:40px;
+}
+.fs img{height:42px;object-fit:contain;}
+.fs-fb{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--gold);display:none;}
+.fs-bar{width:220px;height:2px;background:var(--br2);border-radius:99px;overflow:hidden;}
+.fs-fill{height:2px;background:var(--gold);border-radius:99px;width:0;transition:width .3s ease;}
+.fs-txt{font-size:12px;color:var(--t3);letter-spacing:.04em;}
+.fs-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--t1);margin-bottom:6px;}
+.fs-desc{font-size:13px;color:var(--t2);max-width:380px;line-height:1.65;margin-bottom:24px;}
+
+/* ── DROPZONE ── */
+.dropzone{
+  border:1.5px dashed var(--br2);border-radius:14px;
+  padding:32px 28px;cursor:pointer;
+  position:relative;transition:all .18s;
+  background:var(--bg2);text-align:center;width:100%;max-width:420px;
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--gold);background:var(--gold-dim);}
+.dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+.dz-ic{font-size:28px;margin-bottom:10px;}
+.dz-lb{font-size:14px;font-weight:500;color:var(--t1);margin-bottom:4px;}
+.dz-ht{font-size:11px;color:var(--t3);}
+
+/* ── PIN MODAL ── */
+.mbg{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:24px;
+}
+.mbg.open{display:flex;}
+.mcard{
+  background:var(--surf);border:1px solid var(--br2);
+  border-radius:18px;padding:34px 30px;
+  width:100%;max-width:340px;
+  box-shadow:var(--sh);text-align:center;
+}
+.m-ic{font-size:32px;margin-bottom:12px;}
+.m-tt{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--t1);margin-bottom:5px;}
+.m-ds{font-size:13px;color:var(--t2);margin-bottom:22px;line-height:1.5;}
+.pdots{display:flex;justify-content:center;gap:14px;margin-bottom:22px;}
+.pd{width:13px;height:13px;border-radius:50%;border:2px solid var(--br2);transition:all .15s;}
+.pd.on{background:var(--gold);border-color:var(--gold);}
+.pd.err{background:var(--red);border-color:var(--red);}
+.pinpad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:228px;margin:0 auto;}
+.pk{
+  height:52px;border-radius:10px;
+  border:1px solid var(--br2);background:var(--s2);
+  color:var(--t1);font-size:19px;font-weight:500;
+  cursor:pointer;transition:all .12s;
+  display:flex;align-items:center;justify-content:center;
+}
+.pk:hover{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+.pk:active{transform:scale(.93);}
+.pk.del{font-size:15px;color:var(--t2);}
+.pmsg{font-size:12px;height:18px;margin-top:12px;}
+.pmsg.ok{color:var(--green);}
+.pmsg.bad{color:var(--red);}
+.m-cancel{display:block;margin:12px auto 0;background:transparent;border:none;color:var(--t3);font-size:12px;cursor:pointer;padding:6px 14px;border-radius:6px;transition:color .12s;}
+.m-cancel:hover{color:var(--t1);}
+.pin-upload{
+  display:none;margin-top:14px;
+  border:1.5px dashed var(--br2);border-radius:10px;
+  padding:18px;text-align:center;cursor:pointer;
+  position:relative;transition:all .18s;background:var(--bg2);
+}
+.pin-upload:hover,.pin-upload.drag{border-color:var(--gold);background:var(--gold-dim);}
+.pin-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+
+/* ── DASHBOARD ── */
+.stats-row{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:12px;margin-bottom:22px;
+}
+.scard{
+  background:var(--surf);border:1px solid var(--br);
+  border-radius:12px;padding:18px 20px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.scard:hover{border-color:var(--br2);box-shadow:var(--sh2);}
+.sc-l{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:8px;}
+.sc-v{font-size:26px;font-weight:600;color:var(--t1);line-height:1;}
+.sc-v.g{color:var(--gold);}
+.sc-n{font-size:11px;color:var(--t3);margin-top:5px;}
+
+.lu-bar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surf);border:1px solid var(--br);
+  border-radius:10px;padding:11px 16px;margin-bottom:20px;
+  font-size:12px;color:var(--t2);
+}
+.lu-pip{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.lu-pip.old{background:var(--gold);}
+.lu-pip.none{background:var(--t3);}
+.lu-r{margin-left:auto;}
+.lu-btn{background:transparent;border:none;color:var(--gold);font-size:12px;font-weight:500;cursor:pointer;padding:4px 10px;border-radius:6px;transition:background .12s;}
+.lu-btn:hover{background:var(--gold-dim);}
+
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.cpanel{background:var(--surf);border:1px solid var(--br);border-radius:12px;padding:20px 22px;}
+.cp-hd{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--t1);margin-bottom:16px;}
+.brow{margin-bottom:11px;}
+.brow:last-child{margin-bottom:0;}
+.bm{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.bn{color:var(--t2);}
+.bv{color:var(--gold);font-weight:600;font-size:11px;}
+.bt{height:3px;background:var(--s2);border-radius:99px;}
+.bf{height:3px;background:var(--gold);border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+
+/* ── INVENTORY ── */
+.inv-top{display:flex;gap:8px;align-items:center;margin-bottom:13px;flex-wrap:wrap;}
+.isrch{flex:1;min-width:280px;position:relative;}
+.isrch input{
+  width:100%;background:var(--surf);border:1px solid var(--br2);
+  border-radius:9px;padding:9px 14px 9px 36px;
+  color:var(--t1);font-size:13px;outline:none;
+  transition:border-color .18s,box-shadow .18s;
+}
+.isrch input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim);}
+.isrch input::placeholder{color:var(--t3);}
+.isrch-ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none;}
+.cb{
+  padding:8px 13px;border-radius:8px;
+  border:1px solid var(--br2);background:var(--surf);
+  color:var(--t2);font-size:12px;font-weight:500;
+  cursor:pointer;transition:all .12s;white-space:nowrap;
+}
+.cb:hover{border-color:var(--t2);color:var(--t1);}
+.cb.on{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+.pills{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.pl-l{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-right:2px;}
+.pill{
+  padding:4px 11px;border-radius:99px;font-size:11px;font-weight:500;
+  border:1px solid var(--br2);background:transparent;color:var(--t2);
+  cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;gap:3px;
+}
+.pill:hover{border-color:var(--t2);color:var(--t1);}
+.pill.on{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+.pill .pn{font-size:9px;opacity:.7;}
+.res-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.rcnt{font-size:12px;color:var(--t2);}
+.rcnt strong{color:var(--gold);font-weight:600;}
+.vsw{display:flex;gap:3px;}
+.vb{
+  width:28px;height:28px;border-radius:7px;
+  border:1px solid var(--br2);background:transparent;
+  color:var(--t3);cursor:pointer;font-size:12px;
+  display:flex;align-items:center;justify-content:center;transition:all .12s;
+}
+.vb.on{background:var(--gold);border-color:var(--gold);color:#000;}
+
+/* ── GRID ── */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:12px;}
+.pcard{
+  background:var(--surf);border:1px solid var(--br);
+  border-radius:13px;overflow:hidden;cursor:pointer;
+  display:flex;flex-direction:column;
+  transition:border-color .15s,transform .15s,box-shadow .15s;
+}
+.pcard:hover{
+  border-color:var(--gold);transform:translateY(-2px);
+  box-shadow:0 12px 32px rgba(0,0,0,.22);
+}
+[data-theme="light"] .pcard:hover{box-shadow:0 12px 32px rgba(0,0,0,.09);}
+.pc-top{
+  height:134px;background:var(--s2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:34px;position:relative;
+}
+.pc-bgs{
+  position:absolute;inset:7px;
+  display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;
+}
+.bdg{font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:99px;backdrop-filter:blur(8px);}
+.bdg-cat{background:rgba(0,0,0,.48);color:rgba(255,255,255,.75);}
+[data-theme="light"] .bdg-cat{background:rgba(255,255,255,.72);color:rgba(0,0,0,.58);}
+.bdg-in{background:rgba(62,203,130,.15);color:var(--green);border:1px solid rgba(62,203,130,.28);}
+.bdg-out{background:rgba(224,90,90,.15);color:var(--red);border:1px solid rgba(224,90,90,.28);}
+.pc-body{padding:13px 14px;flex:1;display:flex;flex-direction:column;gap:3px;}
+.pc-model{font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--gold);text-transform:uppercase;}
+.pc-name{font-size:12px;color:var(--t1);line-height:1.4;flex:1;}
+.pc-vendor{font-size:11px;color:var(--t3);}
+mark{background:var(--gold-dim);color:var(--gold);border-radius:2px;padding:0 2px;}
+.pc-foot{display:flex;justify-content:space-between;align-items:center;padding-top:9px;margin-top:6px;border-top:1px solid var(--br);}
+.pc-qty{font-size:11px;color:var(--t2);}
+.pc-qty strong{color:var(--t1);font-weight:500;}
+.pc-price{font-size:14px;font-weight:600;color:var(--gold);}
+
+/* ── TABLE ── */
+.twrap{overflow-x:auto;border:1px solid var(--br);border-radius:12px;}
+.tbl{width:100%;border-collapse:collapse;display:none;}
+.tbl thead th{
+  padding:10px 14px;font-size:10px;font-weight:600;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--t3);
+  border-bottom:1px solid var(--br);background:var(--surf);text-align:left;white-space:nowrap;
+}
+.tbl tbody tr{cursor:pointer;transition:background .1s;}
+.tbl tbody tr:hover td{background:var(--s2);}
+.tbl tbody td{
+  padding:9px 14px;font-size:12px;
+  border-bottom:1px solid var(--br);background:var(--surf);vertical-align:middle;color:var(--t1);
+}
+.tbl tbody tr:last-child td{border-bottom:none;}
+.td-m{font-weight:600;font-size:10px;color:var(--gold);white-space:nowrap;}
+.td-d{max-width:300px;}
+.td-p{font-weight:600;color:var(--gold);}
+.td-s{color:var(--t3);font-size:11px;}
+.empty{text-align:center;padding:80px 20px;}
+.e-ic{font-size:34px;opacity:.3;margin-bottom:12px;}
+.e-tt{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--t1);margin-bottom:5px;}
+.e-st{font-size:12px;color:var(--t3);}
+#sentinel{height:40px;display:flex;align-items:center;justify-content:center;margin-top:4px;}
+.spin{width:18px;height:18px;border:2px solid var(--br2);border-top-color:var(--gold);border-radius:50%;animation:sp .7s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+
+/* ── AI ── */
+.ai-wrap{max-width:760px;}
+.ai-hd{
+  background:var(--surf);border:1px solid var(--br);
+  border-radius:13px;padding:20px 24px;margin-bottom:12px;
+  display:flex;align-items:center;gap:14px;
+}
+.ai-av{
+  width:42px;height:42px;border-radius:11px;
+  background:var(--gold-dim);border:1px solid var(--gold-glow);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;position:relative;
+}
+.ai-av::after{
+  content:'';position:absolute;inset:-4px;border-radius:15px;
+  border:1px solid var(--gold);opacity:.2;
+  animation:aura 2.5s ease-in-out infinite;
+}
+@keyframes aura{0%,100%{transform:scale(1);opacity:.2;}50%{transform:scale(1.1);opacity:.05;}}
+.ai-info h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--t1);margin-bottom:2px;}
+.ai-info p{font-size:12px;color:var(--t2);}
+.ai-strow{display:flex;align-items:center;gap:6px;margin-top:4px;}
+.ai-pip{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pp 2.5s infinite;}
+.ai-stxt{font-size:11px;color:var(--t3);}
+.ai-box{background:var(--surf);border:1px solid var(--br);border-radius:13px;overflow:hidden;}
+.ai-msgs{padding:18px;max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;}
+.msg{display:flex;gap:9px;}
+.mav{width:28px;height:28px;flex-shrink:0;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;margin-top:1px;}
+.mav.bot{background:var(--gold-glow);border:1px solid var(--gold-dim);}
+.mav.usr{background:var(--s2);border:1px solid var(--br2);color:var(--t2);}
+.mbub{
+  background:var(--s2);border:1px solid var(--br2);
+  border-radius:11px;padding:10px 13px;
+  font-size:13px;line-height:1.65;max-width:calc(100% - 40px);
+}
+.mbub.usr{background:var(--gold-dim);border-color:var(--gold-glow);}
+.mbub strong{color:var(--gold);}
+.mbub em{color:var(--t2);font-style:normal;}
+.ai-res-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.air{
+  background:var(--surf);border:1px solid var(--br);
+  border-radius:8px;padding:9px 12px;
+  display:flex;align-items:center;gap:10px;
+  cursor:pointer;transition:border-color .12s;
+}
+.air:hover{border-color:var(--gold);}
+.air-l{flex:1;min-width:0;}
+.air-m{font-size:10px;font-weight:600;color:var(--gold);margin-bottom:1px;}
+.air-n{font-size:12px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.air-v{font-size:10px;color:var(--t3);}
+.air-r{text-align:right;flex-shrink:0;}
+.air-p{font-size:13px;font-weight:600;color:var(--gold);}
+.air-q{font-size:10px;color:var(--t3);margin-top:1px;}
+.ai-chips{padding:0 18px 12px;display:flex;gap:5px;flex-wrap:wrap;}
+.chip{padding:4px 11px;border-radius:99px;font-size:11px;font-weight:500;border:1px solid var(--br2);background:transparent;color:var(--t2);cursor:pointer;transition:all .12s;}
+.chip:hover{border-color:var(--gold);color:var(--gold);}
+.ai-inp-bar{padding:12px 14px;border-top:1px solid var(--br);display:flex;gap:8px;align-items:center;}
+.ai-inp{flex:1;background:var(--s2);border:1px solid var(--br2);border-radius:9px;padding:9px 13px;color:var(--t1);font-size:13px;outline:none;transition:border-color .18s,box-shadow .18s;}
+.ai-inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim);}
+.ai-inp::placeholder{color:var(--t3);}
+.ai-go{width:38px;height:38px;border-radius:9px;background:var(--gold);border:none;color:#000;font-size:16px;font-weight:700;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ai-go:hover{background:var(--gold-h);}
+.ai-go:disabled{opacity:.4;cursor:not-allowed;}
+.typing{display:flex;gap:4px;padding:2px 0;}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:ty .8s ease-in-out infinite;}
+.typing span:nth-child(2){animation-delay:.16s;}
+.typing span:nth-child(3){animation-delay:.32s;}
+@keyframes ty{0%,80%,100%{transform:translateY(0);}40%{transform:translateY(-5px);}}
+
+/* ── SETTINGS ── */
+#setLock{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px;}
+.sw{max-width:560px;}
+.ss{background:var(--surf);border:1px solid var(--br);border-radius:12px;padding:20px 22px;margin-bottom:12px;}
+.ss-tt{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.fl{font-size:12px;color:var(--t2);margin-bottom:5px;font-weight:500;}
+.fi{
+  width:100%;background:var(--s2);border:1px solid var(--br2);
+  border-radius:8px;padding:8px 12px;color:var(--t1);
+  font-size:13px;outline:none;margin-bottom:10px;
+  transition:border-color .18s,box-shadow .18s;
+}
+.fi:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-dim);}
+.fi::placeholder{color:var(--t3);}
+.fn{font-size:11px;color:var(--t3);line-height:1.65;margin-top:-4px;margin-bottom:10px;}
+.sbtns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.prow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.pr{padding:6px 12px;border-radius:7px;border:1px solid var(--br2);background:transparent;color:var(--t2);font-size:12px;font-weight:500;cursor:pointer;transition:all .12s;}
+.pr:hover{border-color:var(--gold);color:var(--gold);}
+.pr.sel{background:var(--gold-dim);border-color:var(--gold);color:var(--gold);}
+#sm{font-size:12px;margin-top:10px;display:none;}
+
+/* ── SUPABASE SETUP WIZARD ── */
+.setup-steps{display:flex;flex-direction:column;gap:10px;max-width:540px;margin:0 auto;}
+.step{
+  background:var(--surf);border:1px solid var(--br);
+  border-radius:12px;padding:18px 20px;
+  display:flex;gap:14px;align-items:flex-start;
+}
+.step-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--gold-dim);border:1px solid var(--gold-glow);
+  color:var(--gold);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.step-num.done{background:var(--green);border-color:var(--green);color:#000;}
+.step-body{}
+.step-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--t1);margin-bottom:4px;}
+.step-desc{font-size:12px;color:var(--t2);line-height:1.65;}
+.step-desc code{color:var(--gold);background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:11px;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:20px;right:20px;z-index:999;
+  background:var(--surf);border:1px solid var(--br2);
+  border-left:3px solid var(--gold);
+  padding:10px 16px;border-radius:9px;
+  font-size:13px;color:var(--t1);
+  opacity:0;transform:translateY(6px);
+  transition:all .22s;pointer-events:none;
+  max-width:320px;box-shadow:var(--sh2);
+}
+.toast.show{opacity:1;transform:none;}
+.toast.err{border-left-color:var(--red);}
+.toast.ok{border-left-color:var(--green);}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="fs" id="loading">
+  <img src="https://www.savemoreplumbing.com/logo.PNG" alt="SaveMore"
+    onerror="this.style.display='none';document.getElementById('ldFb').style.display='block'">
+  <div class="fs-fb" id="ldFb">SAVEMORE</div>
+  <div class="fs-bar"><div class="fs-fill" id="ldFill"></div></div>
+  <div class="fs-txt" id="ldTxt">Starting up…</div>
+</div>
+
+<!-- SUPABASE SETUP (first time, no config) -->
+<div class="fs" id="setupScreen" style="display:none;">
+  <img src="https://www.savemoreplumbing.com/logo.PNG" alt="SaveMore" style="margin-bottom:8px;"
+    onerror="this.style.display='none';">
+  <div class="fs-title">One-time Setup Required</div>
+  <div class="fs-desc">Connect your Supabase database so inventory syncs automatically for all staff. Takes about 5 minutes.</div>
+  <div class="setup-steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Create free Supabase account</div>
+        <div class="step-desc">Go to <a href="https://supabase.com" target="_blank">supabase.com</a> → Sign up → New Project → name it <code>savemore</code> → wait ~1 min for it to start</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Create the inventory table</div>
+        <div class="step-desc">In your Supabase project → click <strong>SQL Editor</strong> in the left sidebar → New query → paste this and click Run:</div>
+        <div style="background:var(--bg2);border:1px solid var(--br2);border-radius:8px;padding:12px;margin-top:8px;font-size:11px;font-family:monospace;color:var(--t1);line-height:1.7;text-align:left;overflow-x:auto;">
+create table if not exists inventory (<br>
+&nbsp;&nbsp;id bigint generated always as identity primary key,<br>
+&nbsp;&nbsp;model text, description text, category text,<br>
+&nbsp;&nbsp;price numeric, cost numeric,<br>
+&nbsp;&nbsp;qty integer, qty_av integer,<br>
+&nbsp;&nbsp;location text, vendor text,<br>
+&nbsp;&nbsp;updated_at timestamptz default now()<br>
+);<br>
+alter table inventory enable row level security;<br>
+create policy "public read" on inventory for select using (true);<br>
+create policy "service write" on inventory for all using (true);
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Paste your project credentials</div>
+        <div class="step-desc">In Supabase → <strong>Settings → API</strong> → copy <strong>Project URL</strong> and <strong>anon public</strong> key (NOT service_role)</div>
+        <div style="margin-top:10px;">
+          <div class="fl">Supabase Project URL</div>
+          <input type="text" class="fi" id="sbUrl" placeholder="https://xxxxxxxxxxxx.supabase.co" style="margin-bottom:10px;">
+          <div class="fl">Anon Public Key</div>
+          <input type="password" class="fi" id="sbKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... (anon key)">
+          <div class="fn">Use the <strong>anon public</strong> key from Settings → API. Never the service_role key.</div>
+          <button class="ab gld" onclick="saveSupabase()" style="margin-top:4px;">Save & Continue →</button>
+          <div id="sbSetupMsg" style="font-size:12px;margin-top:10px;color:var(--t2);display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FIRST UPLOAD (supabase connected, no data yet) -->
+<div class="fs" id="firstUpload" style="display:none;">
+  <img src="https://www.savemoreplumbing.com/logo.PNG" alt="SaveMore" style="margin-bottom:8px;"
+    onerror="this.style.display='none';">
+  <div class="fs-title">Upload Your Inventory</div>
+  <div class="fs-desc">Upload your Excel export once to load the database. After this, all staff see inventory automatically — no upload needed on their devices.</div>
+  <label class="dropzone" id="firstDrop">
+    <input type="file" accept=".xlsx,.xls,.csv" onchange="doUpload(event,true)">
+    <div class="dz-ic">📊</div>
+    <div class="dz-lb">Drop your Excel file here or click to browse</div>
+    <div class="dz-ht">First upload · No PIN needed · .xlsx · .xls · .csv</div>
+  </label>
+  <div id="firstUploadMsg" style="font-size:12px;color:var(--t2);margin-top:12px;display:none;"></div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="mbg" id="pinModal">
+  <div class="mcard">
+    <div class="m-ic">🔒</div>
+    <div class="m-tt">Admin PIN</div>
+    <div class="m-ds" id="pinDesc">Enter PIN to continue</div>
+    <div class="pdots">
+      <div class="pd" id="pd0"></div><div class="pd" id="pd1"></div>
+      <div class="pd" id="pd2"></div><div class="pd" id="pd3"></div>
+    </div>
+    <div class="pinpad">
+      <button class="pk" onclick="pk('1')">1</button>
+      <button class="pk" onclick="pk('2')">2</button>
+      <button class="pk" onclick="pk('3')">3</button>
+      <button class="pk" onclick="pk('4')">4</button>
+      <button class="pk" onclick="pk('5')">5</button>
+      <button class="pk" onclick="pk('6')">6</button>
+      <button class="pk" onclick="pk('7')">7</button>
+      <button class="pk" onclick="pk('8')">8</button>
+      <button class="pk" onclick="pk('9')">9</button>
+      <button class="pk del" onclick="pinClear()">✕</button>
+      <button class="pk" onclick="pk('0')">0</button>
+      <button class="pk del" onclick="pinBack()">⌫</button>
+    </div>
+    <div class="pmsg" id="pmsg"></div>
+    <label class="pin-upload" id="pinUpload">
+      <input type="file" accept=".xlsx,.xls,.csv" onchange="doUpload(event,false)">
+      <div style="font-size:22px;margin-bottom:6px;">📊</div>
+      <div style="font-size:13px;font-weight:500;color:var(--t1);margin-bottom:2px;">Select your Excel file</div>
+      <div style="font-size:11px;color:var(--t3);">.xlsx · .xls · .csv</div>
+    </label>
+    <button class="m-cancel" onclick="closePin()">Cancel</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="shell" id="shell" style="display:none;">
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <img src="https://www.savemoreplumbing.com/logo.PNG" alt="SaveMore"
+        onerror="this.style.display='none';document.querySelector('.sb-fb').style.display='block'">
+      <div class="sb-fb">SAVEMORE</div>
+      <div class="sb-tag">Staff Inventory Portal</div>
+    </div>
+    <nav class="sb-nav">
+      <button class="nb active" onclick="go('dashboard',this)"><span class="ic">📊</span>Dashboard</button>
+      <button class="nb" onclick="go('inventory',this)"><span class="ic">📦</span>Inventory<span class="nbb" id="nbTotal">0</span></button>
+      <button class="nb" onclick="go('ai',this)"><span class="ic">✦</span>SaveMore AI</button>
+      <div class="sb-div"></div>
+      <button class="nb" onclick="go('settings',this)"><span class="ic">⚙️</span>Settings</button>
+    </nav>
+    <div class="sb-foot">
+      <div class="sb-sync">
+        <div class="sb-sync-dot" id="syncDot"></div>
+        <span id="syncTxt">Not connected</span>
+      </div>
+      <button class="nb" onclick="openPin('upload')"><span class="ic">↑</span>Update Stock</button>
+    </div>
+  </aside>
+
+  <div class="content">
+    <div class="topbar">
+      <div class="tb-srch" id="tbSrch" style="display:none;">
+        <span class="tb-si">⌕</span>
+        <input type="text" placeholder="Search model #, description, vendor…" oninput="syncQ(this.value)">
+      </div>
+      <div class="tb-r">
+        <button class="ib" id="themeBtn" onclick="toggleTheme()" title="Theme">🌙</button>
+        <button class="ab" onclick="exportData()">↓ Export</button>
+      </div>
+    </div>
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="ptitle">Dashboard</div>
+        <div class="psub" id="dashDate"></div>
+        <div id="luBar"></div>
+        <div class="stats-row" id="statsRow"></div>
+        <div class="charts">
+          <div class="cpanel"><div class="cp-hd">Items by Category</div><div id="catChart"></div></div>
+          <div class="cpanel"><div class="cp-hd">Top Vendors</div><div id="vendChart"></div></div>
+        </div>
+      </div>
+
+      <!-- INVENTORY -->
+      <div class="page" id="page-inventory">
+        <div class="ptitle">Inventory</div>
+        <div class="psub">Browse, search and filter all stock</div>
+        <div class="inv-top">
+          <div class="isrch">
+            <span class="isrch-ic">⌕</span>
+            <input type="text" id="invQ" placeholder="Model #, description, vendor, location…" oninput="setQ(this.value)">
+          </div>
+          <button class="cb" id="inStBtn" onclick="toggleInStock()">In Stock Only</button>
+          <button class="cb" id="sortBtn" onclick="cycleSort()">Sort: Default</button>
+        </div>
+        <div class="pills" id="catPills"></div>
+        <div class="res-bar">
+          <div class="rcnt">Showing <strong id="showN">0</strong> of <strong id="totalN">0</strong></div>
+          <div class="vsw">
+            <button class="vb on" id="vGrid" onclick="setView('grid')" title="Grid">⊞</button>
+            <button class="vb" id="vList" onclick="setView('list')" title="List">☰</button>
+          </div>
+        </div>
+        <div id="prodGrid" class="pgrid"></div>
+        <div class="twrap" id="tblWrap" style="display:none;">
+          <table class="tbl" id="prodTbl">
+            <thead><tr>
+              <th>Model #</th><th>Description</th><th>Category</th>
+              <th>Price</th><th>Cost</th><th>Qty</th>
+              <th>Vendor</th><th>Location</th><th>Status</th>
+            </tr></thead>
+            <tbody id="prodTblBody"></tbody>
+          </table>
+        </div>
+        <div id="emptyState" class="empty" style="display:none;">
+          <div class="e-ic">⌕</div>
+          <div class="e-tt">No results found</div>
+          <div class="e-st">Try different keywords or ask SaveMore AI</div>
+        </div>
+        <div id="sentinel"></div>
+      </div>
+
+      <!-- AI -->
+      <div class="page" id="page-ai">
+        <div class="ai-wrap">
+          <div class="ai-hd">
+            <div class="ai-av">✦</div>
+            <div class="ai-info">
+              <h3>SaveMore AI</h3>
+              <p>Natural language inventory search</p>
+              <div class="ai-strow">
+                <div class="ai-pip"></div>
+                <span class="ai-stxt" id="aiStxt">Ready — ask anything about your stock</span>
+              </div>
+            </div>
+          </div>
+          <div class="ai-box">
+            <div class="ai-msgs" id="aiMsgs">
+              <div class="msg">
+                <div class="mav bot">✦</div>
+                <div class="mbub">
+                  <strong>Hello, I'm SaveMore AI.</strong><br><br>
+                  I have full access to your inventory. Ask me naturally:<br><br>
+                  <em>· "Do we have 25×18 kitchen sinks in stock?"</em><br>
+                  <em>· "Show me pull-down faucets under $300"</em><br>
+                  <em>· "What elongated toilets do we carry?"</em><br>
+                  <em>· "Any flush mount lights available?"</em>
+                </div>
+              </div>
+            </div>
+            <div class="ai-chips">
+              <span class="chip" onclick="chipAsk(this)">Kitchen sinks in stock</span>
+              <span class="chip" onclick="chipAsk(this)">Pull-down faucets</span>
+              <span class="chip" onclick="chipAsk(this)">Elongated toilets</span>
+              <span class="chip" onclick="chipAsk(this)">Flush mount lighting</span>
+              <span class="chip" onclick="chipAsk(this)">What's in stock today?</span>
+            </div>
+            <div class="ai-inp-bar">
+              <input class="ai-inp" id="aiInp" placeholder="Ask about your inventory…"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();sendAI();}">
+              <button class="ai-go" id="aiGo" onclick="sendAI()">→</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div id="setLock">
+          <div style="font-size:40px;margin-bottom:16px;opacity:.5;">🔒</div>
+          <div class="ptitle" style="margin-bottom:8px;">Settings locked</div>
+          <div style="font-size:13px;color:var(--t2);max-width:300px;line-height:1.65;margin-bottom:22px;">Enter your admin PIN to access settings.</div>
+          <button class="ab gld" style="padding:10px 26px;" onclick="openPin('settings')">Enter PIN to unlock</button>
+        </div>
+        <div id="setOpen" style="display:none;">
+          <div class="ptitle">Settings</div>
+          <div class="psub">AI provider and data management</div>
+          <div class="sw">
+
+            <div class="ss">
+              <div class="ss-tt">Supabase Connection</div>
+              <div class="fl">Project URL</div>
+              <input type="text" class="fi" id="sbUrlSt" placeholder="https://xxxxxxxxxxxx.supabase.co">
+              <div class="fl">Anon Public Key</div>
+              <input type="password" class="fi" id="sbKeySt" placeholder="eyJ…">
+              <div class="fn">Your Supabase credentials. Change these only if you create a new project.</div>
+              <div class="sbtns">
+                <button class="ab gld" onclick="updateSupabase()">Save Connection</button>
+                <button class="ab" onclick="testSupabase()">Test Connection</button>
+              </div>
+              <div id="sbStMsg" style="font-size:12px;margin-top:10px;display:none;"></div>
+            </div>
+
+            <div class="ss">
+              <div class="ss-tt">AI Provider · SaveMore AI</div>
+              <div class="fl">Quick presets</div>
+              <div class="prow">
+                <button class="pr" id="pr-claude" onclick="setPreset('claude')">Claude (Anthropic)</button>
+                <button class="pr" id="pr-openai" onclick="setPreset('openai')">OpenAI / ChatGPT</button>
+                <button class="pr" id="pr-gemini" onclick="setPreset('gemini')">Gemini (Google)</button>
+                <button class="pr" id="pr-custom" onclick="setPreset('custom')">Custom</button>
+              </div>
+              <div class="fl">API Endpoint URL</div>
+              <input type="text" class="fi" id="aiEndpoint" placeholder="https://api.anthropic.com/v1/messages">
+              <div class="fl">API Key</div>
+              <input type="password" class="fi" id="aiKey" placeholder="Your API key">
+              <div class="fl">Model Name</div>
+              <input type="text" class="fi" id="aiModel" placeholder="claude-sonnet-4-20250514">
+              <div class="fn" id="aiNote">Choose a preset or enter any OpenAI-compatible endpoint. Key stored locally only.</div>
+              <div class="sbtns">
+                <button class="ab gld" onclick="saveAI()">Save AI Config</button>
+                <button class="ab" onclick="clearAI()">Clear</button>
+              </div>
+              <div id="sm"></div>
+            </div>
+
+            <div class="ss">
+              <div class="ss-tt">Inventory Data</div>
+              <div style="font-size:12px;color:var(--t2);line-height:1.8;margin-bottom:12px;" id="dataInfo">—</div>
+              <div class="sbtns">
+                <button class="ab" onclick="openPin('upload')">↑ Update Inventory</button>
+                <button class="ab" onclick="forceRefresh()">↻ Refresh from DB</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+'use strict';
+
+/* ═══ CONFIG ═══════════════════════════════════════ */
+const PIN   = '9669';
+const BATCH = 60;
+
+/* ═══ STATE ════════════════════════════════════════ */
+let inv=[], filt=[], rbuf=[], roff=0;
+let curCat='all', inStOnly=false, sortM='default', curView='grid', Q='';
+let aiCfg={endpoint:'',key:'',model:''};
+let sbUrl='', sbKey='';
+let pinEntry='', pinTarget='upload';
+let uploadedAt=null;
+let vo=null;
+
+/* ═══ SUPABASE CLIENT ══════════════════════════════ */
+// Lightweight fetch wrapper — no SDK needed
+async function sbFetch(path, options={}){
+  const url = sbUrl.replace(/\/$/,'') + path;
+  const res = await fetch(url, {
+    ...options,
+    headers:{
+      'apikey': sbKey,
+      'Authorization': 'Bearer ' + sbKey,
+      'Content-Type': 'application/json',
+      'Prefer': options.prefer || '',
+      ...(options.headers||{})
+    }
+  });
+  if(!res.ok){
+    const err = await res.text();
+    throw new Error(`Supabase error ${res.status}: ${err}`);
+  }
+  const ct = res.headers.get('content-type')||'';
+  return ct.includes('json') ? res.json() : res.text();
+}
+
+async function sbCount(){
+  const r = await fetch(sbUrl.replace(/\/$/,'')+'/rest/v1/inventory?select=id&limit=1', {
+    headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey,'Prefer':'count=exact'}
+  });
+  const count = r.headers.get('content-range');
+  return count ? parseInt(count.split('/')[1])||0 : 0;
+}
+
+async function sbLoadAll(){
+  // Supabase max 1000 per request — paginate for 35k items
+  let all=[], from=0;
+  const pageSize=1000;
+  while(true){
+    const rows = await sbFetch(`/rest/v1/inventory?select=*&order=id.asc&offset=${from}&limit=${pageSize}`);
+    all.push(...rows);
+    if(rows.length < pageSize) break;
+    from += pageSize;
+    setSyncStatus('syncing', `Loading… ${all.length.toLocaleString()} items`);
+  }
+  return all;
+}
+
+async function sbUpsertBatch(rows){
+  // Insert in chunks of 500 for reliability
+  const CHUNK=500;
+  for(let i=0;i<rows.length;i+=CHUNK){
+    const chunk=rows.slice(i,i+CHUNK);
+    await sbFetch('/rest/v1/inventory', {
+      method:'POST',
+      prefer:'resolution=merge-duplicates',
+      headers:{'Prefer':'resolution=merge-duplicates'},
+      body: JSON.stringify(chunk)
+    });
+  }
+}
+
+async function sbClearAndInsert(rows){
+  // Delete all then insert fresh
+  await sbFetch('/rest/v1/inventory?id=gte.0', {method:'DELETE'});
+  // Also delete items with id<0 isn't needed since identity starts at 1
+  // Re-insert without id (let DB generate)
+  const clean=rows.map(r=>({model:r.model,description:r.description,category:r.category,price:r.price,cost:r.cost,qty:r.qty,qty_av:r.qty_av,location:r.location,vendor:r.vendor,updated_at:new Date().toISOString()}));
+  const CHUNK=500;
+  for(let i=0;i<clean.length;i+=CHUNK){
+    await sbFetch('/rest/v1/inventory',{
+      method:'POST',
+      body:JSON.stringify(clean.slice(i,i+CHUNK))
+    });
+    const pct=Math.round((i+CHUNK)/clean.length*100);
+    setSyncStatus('syncing',`Uploading… ${Math.min(i+CHUNK,clean.length).toLocaleString()}/${clean.length.toLocaleString()}`);
+  }
+}
+
+async function sbGetMeta(){
+  try{
+    const r = await sbFetch('/rest/v1/inventory?select=updated_at&order=updated_at.desc&limit=1');
+    return r[0]?.updated_at || null;
+  }catch{return null;}
+}
+
+/* ═══ CATEGORIES ═══════════════════════════════════ */
+const CATS=[
+  {k:'toilet',  e:'🚽',l:'Toilets',       w:['toilet','commode','water closet','gpf','bidet']},
+  {k:'sink',    e:'🪣',l:'Sinks',         w:['sink','basin','undermount','self-rim','drop-in','lavatory','vessel','washbasin']},
+  {k:'faucet',  e:'🚰',l:'Faucets',       w:['faucet','tap','pull-down','pull-out','widespread','single handle','two handle','bridge faucet','mixer']},
+  {k:'tub',     e:'🛁',l:'Bathtubs',      w:['bathtub','soaking tub','alcove','freestanding tub','whirlpool','jetted','apron front']},
+  {k:'shower',  e:'🚿',l:'Shower',        w:['shower','showerhead','rain head','body spray','trim kit','thermostatic','valve trim','hand shower']},
+  {k:'lighting',e:'💡',l:'Lighting',      w:['light','lighting','lamp','chandelier','flush mount','pendant','sconce','led','lumens','fixture','lantern','ceiling light','vanity light']},
+  {k:'vanity',  e:'🪞',l:'Vanity',        w:['vanity','mirror','medicine cabinet']},
+  {k:'hardware',e:'🔩',l:'Hardware',      w:['door knob','lever handle','deadbolt','latch','hinge','towel bar','towel ring','toilet paper holder','grab bar','robe hook','passage','privacy','dummy lever']},
+  {k:'drain',   e:'↓', l:'Drains',        w:['drain','strainer','overflow','p-trap','waste']},
+  {k:'valve',   e:'🔧',l:'Valves & Parts',w:['valve','cartridge','supply line','shut-off','ball valve','angle stop','coupling','elbow','fitting','flange','wax ring']},
+  {k:'access',  e:'🧴',l:'Accessories',   w:['soap dispenser','towel holder','toilet brush','shelf','caddy']},
+];
+function getCatKey(desc){
+  if(!desc) return 'other';
+  const d=desc.toLowerCase();
+  for(const c of CATS) if(c.w.some(w=>d.includes(w))) return c.k;
+  return 'other';
+}
+function gc(k){return CATS.find(c=>c.k===k)||{k:'other',e:'📦',l:'Other'};}
+
+/* ═══ EXCEL PARSE ══════════════════════════════════ */
+function ev(v){
+  if(v==null) return '';
+  const s=String(v);
+  const m=s.match(/^=LEFT\("(.*)",\d+\)$/s);
+  return m?m[1]:s;
+}
+function en(v){const n=parseFloat(ev(v));return isNaN(n)?0:n;}
+function cm(m){return(m||'').replace(/[#\-\.\s_\/\\]/g,'').toUpperCase();}
+
+function parseXL(buf){
+  const wb=XLSX.read(buf,{type:'array',cellFormula:false});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+  if(raw.length<2) throw new Error('File appears empty');
+  const hdr=raw[0].map(h=>ev(h).toLowerCase().replace(/[\s\-_]+/g,''));
+  const col=(...ks)=>{for(const k of ks){const i=hdr.findIndex(h=>h.includes(k));if(i>=0)return i;}return -1;};
+  const iM=col('item#','item','sku','model','part','number');
+  const iD=col('desc','name','product','title');
+  const iC=col('cat','category');
+  const iP=col('price1','price','retail','sell');
+  const iX=col('rplc','cost','replace');
+  const iQ=col('qtyonhand','qtyoh','onhand','qty','quantity','stock');
+  const iA=col('qtyavailable','qtyav','available');
+  const iL=col('location','loc','bin','shelf');
+  const iV=col('vendor','supplier','brand','manuf');
+  const out=[];
+  for(let r=1;r<raw.length;r++){
+    const row=raw[r];
+    const model=ev(row[iM]??'').trim();
+    const desc=ev(row[iD]??'').trim();
+    if(!model&&!desc) continue;
+    out.push({
+      model, description:desc,
+      category: getCatKey(desc),
+      price:en(row[iP]), cost:en(row[iX]),
+      qty:en(row[iQ]), qty_av:en(row[iA]),
+      location:ev(row[iL]??''), vendor:ev(row[iV]??'')
+    });
+  }
+  return out;
+}
+
+/* ═══ UPLOAD ═══════════════════════════════════════ */
+async function doUpload(e, isFirst){
+  const f=e.target.files?.[0]; if(!f) return;
+  const msg = isFirst ? document.getElementById('firstUploadMsg') : null;
+  const showMsg=(t)=>{ if(msg){msg.style.display='block';msg.textContent=t;} toast(t); };
+  try{
+    showMsg('Parsing ' + f.name + '…');
+    const buf=await f.arrayBuffer();
+    const items=parseXL(buf);
+    if(!items.length) throw new Error('No items found in file');
+    showMsg(`Uploading ${items.length.toLocaleString()} items to database…`);
+    await sbClearAndInsert(items);
+    // Reload from DB so we have IDs
+    showMsg('Finalising…');
+    await loadFromDB();
+    closePin();
+    document.getElementById('firstUpload').style.display='none';
+    toast('✓ '+items.length.toLocaleString()+' items loaded — all staff updated automatically', 'ok');
+  }catch(err){
+    showMsg('Error: '+err.message);
+    toast('⚠ '+err.message,'err');
+    console.error(err);
+  }
+  e.target.value='';
+}
+
+/* ═══ LOAD FROM DB ════════════════════════════════ */
+async function loadFromDB(){
+  setSyncStatus('syncing','Loading from database…');
+  try{
+    const rows = await sbLoadAll();
+    if(!rows.length){ setSyncStatus('off','No data in database'); return false; }
+    inv = rows.map(r=>({...r, mc:cm(r.model||'')}));
+    uploadedAt = await sbGetMeta();
+    bootUI();
+    setSyncStatus('live','Live · '+inv.length.toLocaleString()+' items');
+    localStorage.setItem('sm_lastLoad', Date.now().toString());
+    return true;
+  }catch(err){
+    setSyncStatus('off','DB error: '+err.message);
+    toast('⚠ Could not load from database: '+err.message,'err');
+    console.error(err);
+    return false;
+  }
+}
+
+async function forceRefresh(){
+  toast('Refreshing from database…');
+  await loadFromDB();
+}
+
+/* ═══ PIN ══════════════════════════════════════════ */
+function openPin(target){
+  pinTarget=target||'upload';
+  pinEntry='';
+  document.getElementById('pinDesc').textContent=
+    pinTarget==='settings'?'Enter PIN to unlock Settings':'Enter PIN to update inventory';
+  document.getElementById('pmsg').textContent='';
+  document.getElementById('pmsg').className='pmsg';
+  document.getElementById('pinUpload').style.display='none';
+  document.getElementById('pinModal').classList.add('open');
+  updateDots();
+}
+function closePin(){
+  pinEntry='';
+  document.getElementById('pinModal').classList.remove('open');
+}
+function pk(d){
+  if(pinEntry.length>=4) return;
+  pinEntry+=d; updateDots();
+  if(pinEntry.length===4) checkPin();
+}
+function pinBack(){pinEntry=pinEntry.slice(0,-1);updateDots();}
+function pinClear(){pinEntry='';updateDots();}
+function updateDots(){
+  for(let i=0;i<4;i++){
+    const el=document.getElementById('pd'+i);
+    el.classList.toggle('on',i<pinEntry.length);
+    el.classList.remove('err');
+  }
+}
+function checkPin(){
+  if(pinEntry===PIN){
+    document.getElementById('pmsg').textContent='✓ Correct';
+    document.getElementById('pmsg').className='pmsg ok';
+    if(pinTarget==='settings'){
+      setTimeout(()=>{
+        closePin();
+        document.getElementById('setLock').style.display='none';
+        document.getElementById('setOpen').style.display='block';
+        loadSettingsFields();
+      },380);
+    } else {
+      document.getElementById('pinUpload').style.display='block';
+    }
+  } else {
+    for(let i=0;i<4;i++) document.getElementById('pd'+i).classList.add('err');
+    document.getElementById('pmsg').textContent='Incorrect PIN';
+    document.getElementById('pmsg').className='pmsg bad';
+    setTimeout(()=>{pinEntry='';updateDots();document.getElementById('pmsg').textContent='';},1000);
+  }
+}
+// Drag on pin upload
+const pu=document.getElementById('pinUpload');
+['dragover','dragleave','drop'].forEach(ev2=>{
+  pu.addEventListener(ev2,e=>{
+    e.preventDefault();
+    if(ev2==='dragover') pu.classList.add('drag');
+    if(ev2==='dragleave') pu.classList.remove('drag');
+    if(ev2==='drop'){
+      pu.classList.remove('drag');
+      const f=e.dataTransfer?.files?.[0];
+      if(f){const dt=new DataTransfer();dt.items.add(f);pu.querySelector('input').files=dt.files;pu.querySelector('input').dispatchEvent(new Event('change',{bubbles:true}));}
+    }
+  });
+});
+
+/* ═══ SEARCH & SCORE ═══════════════════════════════ */
+function lev(a,b){
+  if(Math.abs(a.length-b.length)>4) return 99;
+  const R=a.length+1,C=b.length+1,dp=new Uint8Array(R*C);
+  for(let i=0;i<R;i++) dp[i*C]=i;
+  for(let j=0;j<C;j++) dp[j]=j;
+  for(let i=1;i<R;i++) for(let j=1;j<C;j++){
+    dp[i*C+j]=a[i-1]===b[j-1]?dp[(i-1)*C+(j-1)]:1+Math.min(dp[(i-1)*C+j],dp[i*C+(j-1)],dp[(i-1)*C+(j-1)]);
+  }
+  return dp[(R-1)*C+(C-1)];
+}
+function scoreItem(item,terms){
+  let s=0;
+  const d=(item.description||'').toLowerCase();
+  const mc=item.mc||cm(item.model||'');
+  for(const t of terms){
+    const tc=cm(t);
+    if(mc===tc){s+=30;continue;}
+    if(mc.startsWith(tc)||tc.startsWith(mc)){s+=20;continue;}
+    if(mc.includes(tc)||tc.includes(mc)){s+=14;continue;}
+    if(tc.length>=4&&lev(tc,mc)<=2){s+=8;continue;}
+    if(d.includes(t)){s+=4;continue;}
+    if((item.vendor||'').toLowerCase().includes(t)){s+=3;continue;}
+    if((item.location||'').toLowerCase().includes(t)){s+=2;continue;}
+    s-=6;
+  }
+  return s;
+}
+const SW=new Set(['the','and','for','are','this','with','have','want','need','show','find','some','what','which','any','our','can','you','all','do','we','got','carry','get','me','is','in','a','an','i','it','to','of','on','at','by','that','items','stock','price']);
+
+function applyFilters(){
+  const terms=Q.toLowerCase().split(/\s+/).filter(t=>t.length>0);
+  let res=inv.slice();
+  if(curCat!=='all') res=res.filter(i=>i.category===curCat);
+  if(inStOnly)       res=res.filter(i=>i.qty>0);
+  if(terms.length){
+    res=res.map(i=>({i,s:scoreItem(i,terms)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).map(x=>x.i);
+  }
+  if(sortM==='price-asc')  res.sort((a,b)=>a.price-b.price);
+  if(sortM==='price-desc') res.sort((a,b)=>b.price-a.price);
+  if(sortM==='qty-desc')   res.sort((a,b)=>b.qty-a.qty);
+  if(sortM==='alpha')      res.sort((a,b)=>(a.description||'').localeCompare(b.description||''));
+  filt=res;
+  document.getElementById('showN').textContent=res.length.toLocaleString();
+  document.getElementById('totalN').textContent=inv.length.toLocaleString();
+  roff=0; rbuf=res; renderBatch();
+}
+
+/* ═══ RENDER ═══════════════════════════════════════ */
+function hl(text,terms){
+  if(!text||!terms.length) return text||'';
+  let o=text;
+  for(const t of terms){
+    if(t.length<2) continue;
+    o=o.replace(new RegExp('('+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>');
+  }
+  return o;
+}
+function renderBatch(){
+  const terms=Q.toLowerCase().split(/\s+/).filter(t=>t.length>0);
+  const grid=document.getElementById('prodGrid');
+  const tbody=document.getElementById('prodTblBody');
+  const empty=document.getElementById('emptyState');
+  const tw=document.getElementById('tblWrap');
+  if(roff===0){grid.innerHTML='';tbody.innerHTML='';}
+  if(!rbuf.length&&roff===0){empty.style.display='block';return;}
+  empty.style.display='none';
+  const slice=rbuf.slice(roff,roff+BATCH);
+  roff+=slice.length;
+  if(curView==='grid'){
+    grid.style.display='grid'; tw.style.display='none';
+    const f=document.createDocumentFragment();
+    for(const item of slice){
+      const c=gc(item.category), inS=item.qty>0;
+      const el=document.createElement('div');
+      el.className='pcard';
+      el.innerHTML=`
+        <div class="pc-top">
+          <span style="opacity:.25;font-size:34px;">${c.e}</span>
+          <div class="pc-bgs">
+            <span class="bdg bdg-cat">${c.l}</span>
+            <span class="bdg ${inS?'bdg-in':'bdg-out'}">${inS?'IN STOCK':'OUT'}</span>
+          </div>
+        </div>
+        <div class="pc-body">
+          <div class="pc-model">${hl(item.model||'',terms)}</div>
+          <div class="pc-name">${hl(item.description||'',terms)}</div>
+          ${item.vendor?`<div class="pc-vendor">${item.vendor}</div>`:''}
+          <div class="pc-foot">
+            <div class="pc-qty">Qty: <strong>${item.qty}</strong>${item.location?' · '+item.location:''}</div>
+            <div class="pc-price">${item.price>0?'$'+item.price.toFixed(2):'—'}</div>
+          </div>
+        </div>`;
+      el.onclick=()=>gImg(item);
+      f.appendChild(el);
+    }
+    grid.appendChild(f);
+  } else {
+    grid.style.display='none'; tw.style.display='block';
+    const f=document.createDocumentFragment();
+    for(const item of slice){
+      const c=gc(item.category), inS=item.qty>0;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td class="td-m">${hl(item.model||'',terms)}</td>
+        <td class="td-d">${hl(item.description||'',terms)}</td>
+        <td style="font-size:11px;color:var(--t2);">${c.e} ${c.l}</td>
+        <td class="td-p">${item.price>0?'$'+item.price.toFixed(2):'—'}</td>
+        <td class="td-s">${item.cost>0?'$'+item.cost.toFixed(2):'—'}</td>
+        <td>${item.qty}</td>
+        <td class="td-s">${item.vendor||''}</td>
+        <td class="td-s" style="font-size:10px;">${item.location||''}</td>
+        <td><span class="bdg ${inS?'bdg-in':'bdg-out'}" style="font-size:9px;">${inS?'IN STOCK':'OUT'}</span></td>`;
+      tr.onclick=()=>gImg(item);
+      f.appendChild(tr);
+    }
+    tbody.appendChild(f);
+  }
+  const sent=document.getElementById('sentinel');
+  sent.innerHTML=roff<rbuf.length?'<div class="spin"></div>':'';
+}
+function gImg(item){
+  window.open('https://www.google.com/search?q='+encodeURIComponent(((item.model||'')+' '+(item.description||'')).trim().slice(0,80))+'&tbm=isch','_blank');
+}
+function setupVO(){
+  if(vo) vo.disconnect();
+  vo=new IntersectionObserver(en=>{if(en[0].isIntersecting&&roff<rbuf.length)renderBatch();},{rootMargin:'200px'});
+  vo.observe(document.getElementById('sentinel'));
+}
+
+/* ═══ DASHBOARD ════════════════════════════════════ */
+function buildDash(){
+  const total=inv.length, inS=inv.filter(i=>i.qty>0).length;
+  const outS=inv.filter(i=>i.qty===0).length;
+  const totalQty=inv.reduce((s,i)=>s+i.qty,0);
+  const totalVal=inv.reduce((s,i)=>s+(i.price*i.qty),0);
+  const priced=inv.filter(i=>i.price>0);
+  const avg=priced.length?priced.reduce((s,i)=>s+i.price,0)/priced.length:0;
+
+  document.getElementById('statsRow').innerHTML=[
+    {l:'Total SKUs',      v:total.toLocaleString(),                      n:'Unique product lines'},
+    {l:'In Stock',        v:inS.toLocaleString(),     g:1,               n:((inS/total*100)||0).toFixed(1)+'% availability'},
+    {l:'Out of Stock',    v:outS.toLocaleString(),                       n:'Needs replenishment'},
+    {l:'Total Units',     v:totalQty.toLocaleString(),                   n:'Units on shelf'},
+    {l:'Inventory Value', v:'$'+(totalVal/1000).toFixed(1)+'K', g:1,    n:'Retail × qty'},
+    {l:'Avg. List Price', v:'$'+avg.toFixed(0),                         n:'Across priced items'},
+  ].map(s=>`<div class="scard"><div class="sc-l">${s.l}</div><div class="sc-v${s.g?' g':''}">${s.v}</div><div class="sc-n">${s.n}</div></div>`).join('');
+
+  const cm2={},vm={};
+  inv.forEach(i=>{cm2[i.category]=(cm2[i.category]||0)+1;const v=i.vendor||'Unknown';vm[v]=(vm[v]||0)+1;});
+  const cs=Object.entries(cm2).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const vs=Object.entries(vm).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const cMax=cs[0]?.[1]||1, vMax=vs[0]?.[1]||1;
+  document.getElementById('catChart').innerHTML=cs.map(([k,n])=>{
+    const c=gc(k);
+    return `<div class="brow"><div class="bm"><span class="bn">${c.e} ${c.l}</span><span class="bv">${n.toLocaleString()}</span></div><div class="bt"><div class="bf" style="width:${(n/cMax*100).toFixed(1)}%"></div></div></div>`;
+  }).join('');
+  document.getElementById('vendChart').innerHTML=vs.map(([v,n])=>
+    `<div class="brow"><div class="bm"><span class="bn">${v}</span><span class="bv">${n.toLocaleString()}</span></div><div class="bt"><div class="bf" style="width:${(n/vMax*100).toFixed(1)}%"></div></div></div>`
+  ).join('');
+
+  const ago=uploadedAt?timeAgo(new Date(uploadedAt).getTime()):'Unknown';
+  const isOld=uploadedAt?(Date.now()-new Date(uploadedAt).getTime()>86400000):true;
+  document.getElementById('luBar').innerHTML=`
+    <div class="lu-bar">
+      <div class="lu-pip${isOld?' old':''}"></div>
+      <span>Last updated: <strong>${ago}</strong> · Data live from Supabase</span>
+      <div class="lu-r"><button class="lu-btn" onclick="openPin('upload')">↑ Update now</button></div>
+    </div>`;
+  document.getElementById('dashDate').textContent=new Date().toLocaleDateString('en-CA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return 'just now';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+
+/* ═══ PILLS ════════════════════════════════════════ */
+function buildPills(){
+  const cnt={};
+  inv.forEach(i=>{cnt[i.category]=(cnt[i.category]||0)+1;});
+  const sorted=Object.entries(cnt).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('catPills').innerHTML=
+    `<span class="pl-l">Filter</span>
+     <span class="pill on" onclick="filterCat('all',this)">All <span class="pn">${inv.length.toLocaleString()}</span></span>`
+    +sorted.map(([k,n])=>{
+      const c=gc(k);
+      return `<span class="pill" onclick="filterCat('${k}',this)">${c.e} ${c.l} <span class="pn">${n.toLocaleString()}</span></span>`;
+    }).join('');
+}
+function filterCat(k,el){
+  curCat=k;
+  document.querySelectorAll('#catPills .pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on'); applyFilters();
+}
+
+/* ═══ CONTROLS ═════════════════════════════════════ */
+function setQ(v){Q=v;document.getElementById('invQ').value=v;applyFilters();}
+function syncQ(v){setQ(v);if(!document.getElementById('page-inventory').classList.contains('active'))go('inventory',document.querySelector('[onclick*="inventory"]'));}
+function toggleInStock(){inStOnly=!inStOnly;document.getElementById('inStBtn').classList.toggle('on',inStOnly);applyFilters();}
+const SMODES=['default','price-asc','price-desc','qty-desc','alpha'];
+const SLBLS=['Sort: Default','Price ↑','Price ↓','Qty ↓','A–Z'];
+let sIdx=0;
+function cycleSort(){sIdx=(sIdx+1)%SMODES.length;sortM=SMODES[sIdx];document.getElementById('sortBtn').textContent=SLBLS[sIdx];applyFilters();}
+function setView(v){
+  curView=v;
+  document.getElementById('vGrid').classList.toggle('on',v==='grid');
+  document.getElementById('vList').classList.toggle('on',v==='list');
+  roff=0; renderBatch();
+}
+function exportData(){
+  if(!filt.length){toast('Nothing to export');return;}
+  const rows=[['Model #','Description','Category','Price','Cost','Qty','Qty Available','Location','Vendor','Status']];
+  filt.forEach(i=>rows.push([i.model,i.description,gc(i.category).l,i.price,i.cost,i.qty,i.qty_av,i.location,i.vendor,i.qty>0?'In Stock':'Out of Stock']));
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Inventory');
+  XLSX.writeFile(wb,'SaveMore_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('✓ Exported '+filt.length.toLocaleString()+' items','ok');
+}
+
+/* ═══ AI ═══════════════════════════════════════════ */
+function chipAsk(el){
+  document.getElementById('aiInp').value=el.textContent;
+  go('ai',document.querySelector('[onclick*="\'ai\'"]'));
+  sendAI();
+}
+async function sendAI(){
+  const inp=document.getElementById('aiInp');
+  const msg=inp.value.trim();
+  if(!msg) return;
+  if(!inv.length){addBot('Please wait — inventory is still loading.');return;}
+  inp.value='';
+  addUsr(msg);
+  const btn=document.getElementById('aiGo');
+  btn.disabled=true;
+  const typing=addTyping();
+  if(aiCfg.endpoint&&aiCfg.key) await callAI(msg,typing);
+  else await localAI(msg,typing);
+  btn.disabled=false;
+}
+function addUsr(t){const el=document.createElement('div');el.className='msg';el.innerHTML=`<div class="mav usr">👤</div><div class="mbub usr">${t}</div>`;appMsg(el);}
+function addBot(h){const el=document.createElement('div');el.className='msg';el.innerHTML=`<div class="mav bot">✦</div><div class="mbub">${h}</div>`;appMsg(el);return el;}
+function addTyping(){const el=document.createElement('div');el.className='msg';el.id='typing';el.innerHTML=`<div class="mav bot">✦</div><div class="mbub"><div class="typing"><span></span><span></span><span></span></div></div>`;appMsg(el);return el;}
+function appMsg(el){const c=document.getElementById('aiMsgs');c.appendChild(el);c.scrollTop=c.scrollHeight;}
+
+async function localAI(query,typing){
+  await sleep(600);typing?.remove();
+  const q=query.toLowerCase();
+  const terms=q.replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>2&&!SW.has(w));
+  let matches=inv.map(i=>({i,s:scoreItem(i,terms)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+  if(/\bin.?stock\b|available|do you have|have any/.test(q)) matches=matches.filter(x=>x.i.qty>0);
+  const top=matches.slice(0,6).map(x=>x.i);
+  if(!top.length){addBot(`No matches for "<strong>${query}</strong>".<br><em>Try shorter keywords like "sink", "faucet", "delta"</em><br><br><span style="font-size:11px;color:var(--t3);">Configure an AI provider in Settings for smarter search.</span>`);return;}
+  let h=`Found <strong>${matches.length.toLocaleString()}</strong> result${matches.length!==1?'s':''} for "<strong>${query}</strong>":<div class="ai-res-list">`;
+  for(const item of top){
+    const c=gc(item.category);
+    h+=`<div class="air" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(((item.model||'')+' '+(item.description||'')).slice(0,60))}','_blank')">
+      <div class="air-l"><div class="air-m">${c.e} ${item.model||''}</div><div class="air-n">${item.description||''}</div>${item.vendor?`<div class="air-v">${item.vendor}</div>`:''}</div>
+      <div class="air-r"><div class="air-p">${item.price>0?'$'+item.price.toFixed(2):'—'}</div><div class="air-q">${item.qty>0?'Qty: '+item.qty:'Out of stock'}</div></div>
+    </div>`;
+  }
+  h+='</div>';
+  if(matches.length>6) h+=`<div style="margin-top:8px;font-size:11px;color:var(--t3);">+${(matches.length-6).toLocaleString()} more — use Inventory tab to see all</div>`;
+  h+=`<div style="margin-top:10px;font-size:11px;color:var(--t3);">💡 Configure an AI provider in Settings for full natural-language search.</div>`;
+  addBot(h);
+}
+
+async function callAI(query,typing){
+  const scored=inv.map(i=>({i,s:scoreItem(i,query.toLowerCase().split(/\s+/))})).sort((a,b)=>b.s-a.s);
+  const ctx=scored.slice(0,100).map(x=>x.i).map(i=>`${i.model||''}|${i.description||''}|qty:${i.qty}|${i.price>0?'$'+i.price.toFixed(2):'N/A'}|${i.vendor||''}`).join('\n');
+  const sys=`You are SaveMore AI — inventory assistant for Save More Plumbing & Lighting, Surrey & Vancouver BC.\nINVENTORY (${inv.length.toLocaleString()} total, top matches):\n${ctx}\nBe concise. Always mention qty and price. Short practical responses.`;
+  let url=aiCfg.endpoint, hdrs={'Content-Type':'application/json'}, body;
+  const isA=url.includes('anthropic.com'), isG=url.includes('googleapis.com')||url.includes('generativelanguage');
+  if(isA){
+    hdrs['x-api-key']=aiCfg.key; hdrs['anthropic-version']='2023-06-01'; hdrs['anthropic-dangerous-direct-browser-access']='true';
+    body=JSON.stringify({model:aiCfg.model||'claude-sonnet-4-20250514',max_tokens:800,system:sys,messages:[{role:'user',content:query}]});
+  } else if(isG){
+    url=`${url}?key=${aiCfg.key}`;
+    body=JSON.stringify({contents:[{parts:[{text:sys+'\n\nUser: '+query}]}],generationConfig:{maxOutputTokens:800}});
+  } else {
+    hdrs['Authorization']='Bearer '+aiCfg.key;
+    body=JSON.stringify({model:aiCfg.model||'gpt-4o-mini',max_tokens:800,messages:[{role:'system',content:sys},{role:'user',content:query}]});
+  }
+  try{
+    const r=await fetch(url,{method:'POST',headers:hdrs,body});
+    const data=await r.json();
+    typing?.remove();
+    if(data.error){addBot('⚠ API error: '+(data.error.message||JSON.stringify(data.error)));return;}
+    let text='';
+    if(isA) text=(data.content||[]).map(c=>c.text||'').join('');
+    else if(isG) text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    else text=data.choices?.[0]?.message?.content||'';
+    addBot(text.replace(/\n/g,'<br>')||'No response.');
+  }catch(err){typing?.remove();addBot('⚠ Error: '+err.message);}
+}
+
+/* ═══ SETTINGS ═════════════════════════════════════ */
+const PRESETS={
+  claude:{endpoint:'https://api.anthropic.com/v1/messages',model:'claude-sonnet-4-20250514',note:'Get free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>'},
+  openai:{endpoint:'https://api.openai.com/v1/chat/completions',model:'gpt-4o-mini',note:'Get key at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>'},
+  gemini:{endpoint:'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',model:'gemini-1.5-flash',note:'Get free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a>'},
+  custom:{endpoint:'',model:'',note:'Enter any OpenAI-compatible API endpoint and your key.'}
+};
+function setPreset(k){
+  const p=PRESETS[k];
+  document.querySelectorAll('.pr').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('pr-'+k).classList.add('sel');
+  if(p.endpoint) document.getElementById('aiEndpoint').value=p.endpoint;
+  if(p.model)    document.getElementById('aiModel').value=p.model;
+  document.getElementById('aiNote').innerHTML=p.note;
+}
+function loadSettingsFields(){
+  document.getElementById('sbUrlSt').value=sbUrl;
+  document.getElementById('sbKeySt').value=sbKey;
+  if(aiCfg.endpoint){document.getElementById('aiEndpoint').value=aiCfg.endpoint;}
+  if(aiCfg.key)     {document.getElementById('aiKey').value=aiCfg.key;}
+  if(aiCfg.model)   {document.getElementById('aiModel').value=aiCfg.model;}
+  if(aiCfg.endpoint){
+    const k=aiCfg.endpoint.includes('anthropic')?'claude':aiCfg.endpoint.includes('openai')?'openai':aiCfg.endpoint.includes('google')?'gemini':'custom';
+    document.querySelectorAll('.pr').forEach(b=>b.classList.remove('sel'));
+    const btn=document.getElementById('pr-'+k);
+    if(btn) btn.classList.add('sel');
+  }
+  document.getElementById('dataInfo').textContent=
+    inv.length?`${inv.length.toLocaleString()} items · ${inv.filter(i=>i.qty>0).length.toLocaleString()} in stock · Last updated: ${uploadedAt?timeAgo(new Date(uploadedAt).getTime()):'unknown'}`:'No data loaded.';
+}
+async function updateSupabase(){
+  const url=document.getElementById('sbUrlSt').value.trim();
+  const key=document.getElementById('sbKeySt').value.trim();
+  if(!url||!key){showSbStMsg('Enter both URL and key','var(--red)');return;}
+  sbUrl=url; sbKey=key;
+  localStorage.setItem('sm_sb',JSON.stringify({url,key}));
+  showSbStMsg('✓ Saved — refreshing data…','var(--green)');
+  await loadFromDB();
+}
+async function testSupabase(){
+  try{
+    showSbStMsg('Testing…','var(--t2)');
+    const cnt=await sbCount();
+    showSbStMsg(`✓ Connected — ${cnt.toLocaleString()} items in database`,'var(--green)');
+  }catch(e){
+    showSbStMsg('⚠ Failed: '+e.message,'var(--red)');
+  }
+}
+function showSbStMsg(t,c){const el=document.getElementById('sbStMsg');el.style.display='block';el.style.color=c;el.textContent=t;}
+function saveAI(){
+  aiCfg={endpoint:document.getElementById('aiEndpoint').value.trim(),key:document.getElementById('aiKey').value.trim(),model:document.getElementById('aiModel').value.trim()};
+  localStorage.setItem('sm_ai',JSON.stringify(aiCfg));
+  document.getElementById('aiStxt').textContent=aiCfg.key?'AI configured · Ready':'Ready — configure API in Settings';
+  showSM('✓ AI config saved','var(--green)');
+}
+function clearAI(){
+  aiCfg={endpoint:'',key:'',model:''};localStorage.removeItem('sm_ai');
+  ['aiEndpoint','aiKey','aiModel'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.pr').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('aiStxt').textContent='Ready — configure API in Settings';
+  showSM('Cleared','var(--t2)');
+}
+function showSM(t,c){const el=document.getElementById('sm');el.style.display='block';el.style.color=c;el.textContent=t;setTimeout(()=>el.style.display='none',3000);}
+
+/* ═══ SUPABASE SETUP SCREEN ════════════════════════ */
+async function saveSupabase(){
+  const url=document.getElementById('sbUrl').value.trim();
+  const key=document.getElementById('sbKey').value.trim();
+  const msg=document.getElementById('sbSetupMsg');
+  if(!url||!key){msg.style.display='block';msg.textContent='Please enter both URL and key.';return;}
+  if(!url.includes('supabase.co')){msg.style.display='block';msg.textContent='URL should end in .supabase.co';return;}
+  msg.style.display='block';msg.textContent='Testing connection…';
+  sbUrl=url; sbKey=key;
+  try{
+    await sbCount(); // will throw if wrong
+    localStorage.setItem('sm_sb',JSON.stringify({url,key}));
+    msg.textContent='✓ Connected! Now upload your Excel file to load inventory.';
+    setTimeout(()=>{
+      document.getElementById('setupScreen').style.display='none';
+      document.getElementById('firstUpload').style.display='flex';
+    },800);
+  }catch(e){
+    sbUrl=''; sbKey='';
+    msg.textContent='⚠ Could not connect: '+e.message+'. Check your URL and key.';
+  }
+}
+
+/* ═══ ROUTING ══════════════════════════════════════ */
+function go(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name)?.classList.add('active');
+  btn?.classList.add('active');
+  document.getElementById('tbSrch').style.display=name==='inventory'?'block':'none';
+  if(name==='inventory'&&!filt.length) applyFilters();
+  if(name!=='settings'){
+    document.getElementById('setLock').style.display='flex';
+    document.getElementById('setOpen').style.display='none';
+  }
+}
+
+/* ═══ BOOT UI ══════════════════════════════════════ */
+function bootUI(){
+  document.getElementById('shell').style.display='flex';
+  document.getElementById('nbTotal').textContent=inv.length.toLocaleString();
+  buildDash(); buildPills(); applyFilters(); setupVO();
+  go('dashboard',document.querySelector('.nb'));
+}
+
+/* ═══ SYNC STATUS ══════════════════════════════════ */
+function setSyncStatus(state,text){
+  const dot=document.getElementById('syncDot');
+  const txt=document.getElementById('syncTxt');
+  dot.className='sb-sync-dot';
+  if(state==='live') dot.classList.add('live');
+  if(state==='syncing') dot.classList.add('syncing');
+  txt.textContent=text||'';
+}
+
+/* ═══ THEME ════════════════════════════════════════ */
+function toggleTheme(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  const next=isDark?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  localStorage.setItem('sm_theme',next);
+  const btn=document.getElementById('themeBtn');
+  if(btn) btn.textContent=isDark?'☀️':'🌙';
+}
+
+/* ═══ TOAST ════════════════════════════════════════ */
+let toastT;
+function toast(msg,type=''){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast show'+(type?' '+type:'');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+/* ═══ INIT ═════════════════════════════════════════ */
+(async function init(){
+  const ldFill=document.getElementById('ldFill');
+  const ldTxt=document.getElementById('ldTxt');
+
+  // Theme
+  const th=localStorage.getItem('sm_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',th);
+  const thBtn=document.getElementById('themeBtn');
+  if(thBtn) thBtn.textContent=th==='dark'?'🌙':'☀️';
+
+  // AI config
+  try{const s=localStorage.getItem('sm_ai');if(s){aiCfg=JSON.parse(s);const aiEl=document.getElementById('aiStxt');if(aiCfg.key&&aiEl)aiEl.textContent='AI configured · Ready';}}catch(e){}
+
+  // Supabase credentials
+  ldTxt.textContent='Loading configuration…'; ldFill.style.width='20%';
+  try{const s=localStorage.getItem('sm_sb');if(s){const p=JSON.parse(s);sbUrl=p.url||'';sbKey=p.key||'';}}catch(e){}
+
+  await sleep(200);
+  ldFill.style.width='50%';
+
+  function hideLoading(){document.getElementById('loading').style.display='none';}
+  function tmout(ms,msg){return new Promise((_,rej)=>setTimeout(()=>rej(new Error(msg||'Timeout')),ms));}
+
+  if(!sbUrl||!sbKey){
+    hideLoading();
+    document.getElementById('setupScreen').style.display='flex';
+    return;
+  }
+
+  ldTxt.textContent='Connecting to database…'; ldFill.style.width='70%';
+
+  try{
+    const cnt=await Promise.race([sbCount(),tmout(15000,'Connection timed out — check your Supabase URL')]);
+    ldFill.style.width='85%';
+    if(cnt===0){
+      hideLoading();
+      document.getElementById('firstUpload').style.display='flex';
+      return;
+    }
+    ldTxt.textContent='Loading '+cnt.toLocaleString()+' items…';
+    const rows=await Promise.race([sbLoadAll(),tmout(90000,'Loading timed out')]);
+    inv=rows.map(r=>({...r,mc:cm(r.model||'')}));
+    uploadedAt=await sbGetMeta();
+    ldFill.style.width='100%';
+    await sleep(150);
+    hideLoading();
+    bootUI();
+    setSyncStatus('live','Live · '+inv.length.toLocaleString()+' items');
+  }catch(e){
+    console.error('Init failed:',e);
+    hideLoading();
+    document.getElementById('shell').style.display='flex';
+    document.getElementById('nbTotal').textContent='0';
+    setSyncStatus('off','Connection failed');
+    const m=e.message||'';
+    const hint=m.includes('imed out')?'Request timed out — check your Supabase Project URL is correct.'
+      :m.includes('401')||m.includes('403')||m.includes('Forbidden')?'Wrong key — use the anon public key, not service_role.'
+      :'Check your Supabase URL and anon key in Settings.';
+    setTimeout(()=>{
+      document.getElementById('luBar').innerHTML=`<div class="lu-bar" style="border-color:rgba(224,90,90,.3);">
+        <div class="lu-pip none"></div>
+        <span style="color:var(--red);font-weight:500;">Database connection failed</span>
+        <span style="color:var(--t3);margin-left:8px;font-size:11px;">${hint}</span>
+        <div class="lu-r"><button class="lu-btn" onclick="openPin('settings')" style="color:var(--red);">Fix in Settings</button></div>
+      </div>`;
+      document.getElementById('statsRow').innerHTML='<div style="grid-column:1/-1;font-size:12px;color:var(--t3);padding:8px 0;">No data available</div>';
+      document.getElementById('catChart').innerHTML='';
+      document.getElementById('vendChart').innerHTML='';
+    },50);
+  }
+})();
+</script>
+</body>
+</html>
